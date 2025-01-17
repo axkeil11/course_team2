@@ -49,6 +49,7 @@ class Course(models.Model):
 class Lesson(models.Model):
     title = models.CharField(max_length=140)
     video_url = models.FileField(upload_to='lesson_video/')
+    documents = models.ImageField(upload_to='lesson_file/')
     content = models.TextField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
@@ -89,13 +90,16 @@ class Option(models.Model):
 class Exam(models.Model):
     title = models.CharField(max_length=200)
     course = models.ForeignKey(Course, on_delete= models.CASCADE)
-    questions = models.ForeignKey(Question, on_delete= models.CASCADE, related_name='exam_questions')
-    passing_score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1),
-                                                                 MaxValueValidator(5)], null=True,blank=True)
-    duration = models.DurationField(60)
 
     def __str__(self):
         return f'{self.title}-{self.course}'
+
+
+class Questions(models.Model):
+    Questions=models.ForeignKey(Exam, on_delete= models.CASCADE, related_name='exam_questions')
+    passing_score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1),
+                                                                 MaxValueValidator(5)], null=True,blank=True)
+    duration = models.DurationField(60)
 
 
 class Certificate(models.Model):
