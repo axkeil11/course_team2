@@ -64,25 +64,6 @@ class Assignment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
 
-class Question(models.Model):
-    text = models.CharField(max_length=200)
-    create_date = models.DateField(auto_now_add=True)
-    DIFFICULTY_CHOICES=(
-        ('легкий','легкий'),
-        ('средний','средний'),
-        ('сложный','сложный')
-    )
-    difficulty_level = models.CharField(max_length=64, choices=DIFFICULTY_CHOICES, default='легкий')
-
-    def __str__(self):
-        return f'{self.text}-{self.difficulty_level}'
-
-
-class Option(models.Model):
-    question = models.ForeignKey(Question, on_delete= models.CASCADE, related_name='options')
-    text = models.CharField(max_length=200)
-    is_correct = models.BooleanField()
-
     def __str__(self):
         return f'{self.text}-{self.question}'
 
@@ -94,12 +75,25 @@ class Exam(models.Model):
     def __str__(self):
         return f'{self.title}-{self.course}'
 
-
-class Questions(models.Model):
-    Questions=models.ForeignKey(Exam, on_delete= models.CASCADE, related_name='exam_questions')
+class Question(models.Model):
+    text = models.CharField(max_length=200)
+    create_date = models.DateField(auto_now_add=True)
+    DIFFICULTY_CHOICES=(
+        ('легкий','легкий'),
+        ('средний','средний'),
+        ('сложный','сложный')
+    )
+    difficulty_level = models.CharField(max_length=64, choices=DIFFICULTY_CHOICES, default='легкий')
+    Questions = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='exam_questions')
     passing_score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1),
-                                                                 MaxValueValidator(5)], null=True,blank=True)
+                                                                 MaxValueValidator(5)], null=True, blank=True)
     duration = models.DurationField(60)
+
+
+class Option(models.Model):
+    question = models.ForeignKey(Question, on_delete= models.CASCADE, related_name='options')
+    text = models.CharField(max_length=200)
+    is_correct = models.BooleanField()
 
 
 class Certificate(models.Model):

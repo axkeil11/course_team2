@@ -1,6 +1,7 @@
 from .models import Category, Course, Lesson, Assignment, Question, Option, Exam
 from modeltranslation.translator import TranslationOptions,register
 
+
 @register(Category)
 class CategoryTranslationOptions(TranslationOptions):
     fields = ('category_name',)
