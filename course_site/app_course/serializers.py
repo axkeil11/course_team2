@@ -1,23 +1,37 @@
 from rest_framework import serializers
-from .models import UserProfile, Category, Course, Lesson, Assignment, Question, Option, Exam, Certificate, Review
+from .models import UserProfile, Category, Course, Lesson, Assignment, Question, Option, Exam, Certificate, Review, FavouriteCourse, Favourite
 
+
+class UserProfileDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'first_name', 'last_name', 'username', 'profile_picture',
+                  'age', 'phone_number', 'bio', 'user_role']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = ['first_name', 'last_name', 'username']
 
-class CategorySerializer(serializers.ModelSerializer):
+
+class CategorySimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['category_name']
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class LessonListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Course
-        fields = '__all__'
+        model = Lesson
+        fields = ['id', 'title']
+
+
+class LessonDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = ['title', 'video_url', 'content']
+
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,29 +41,118 @@ class LessonSerializer(serializers.ModelSerializer):
 class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
+        fields = ['id', 'title', 'description', 'due_date']
+
+
+class CreateAssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assignment
         fields = '__all__'
 
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = '__all__'
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = '__all__'
+        fields = ['id', 'text', 'is_correct']
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = OptionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Question
+        fields = ['id', 'text', 'difficulty_level', 'passing_score', 'duration', 'options']
+
 
 class ExamSerializer(serializers.ModelSerializer):
+    exam_questions = QuestionSerializer(many=True, read_only=True)
+
     class Meta:
         model = Exam
+        fields = ['id', 'title', 'exam_questions']
+
+
+class CourseListSerializer(serializers.ModelSerializer):
+    category = CategorySimpleSerializer()
+
+    class Meta:
+        model = Course
+        fields = ['id', 'course_name', 'course_image', 'category', 'price']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()
+    course = CourseListSerializer()
+
+    class Meta:
+        model = Review
+        fields = ['id', 'user', 'course', 'rating', 'comment']
+
+
+class CreateReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
         fields = '__all__'
 
+
+class CourseDetailSerializer(serializers.ModelSerializer):
+    category = CategorySimpleSerializer()
+    lessons = LessonListSerializer(many=True, read_only=True)
+    tasks = AssignmentSerializer()
+    created_by = UserProfileSerializer()
+
+    class Meta:
+        model = Course
+        fields = ['course_name', 'course_image', 'category', 'price', 'level',
+                  'description', 'lessons', 'created_by', 'created_at', 'updated_at', 'tasks']
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'category_name']
+
+
+class CategoryDetailSerializer(serializers.ModelSerializer):
+    course_category = CourseListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ['category_name', 'course_category']
+
+
 class CertificateSerializer(serializers.ModelSerializer):
+    student = UserProfileSerializer()
+    course = CourseListSerializer()
+
+    class Meta:
+        model = Certificate
+        fields = ['id', 'student', 'course', 'issued_at', 'certificate_url']
+
+
+class CreateCertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificate
         fields = '__all__'
 
-class ReviewSerializer(serializers.ModelSerializer):
+
+class FavouriteCourseSerializer(serializers.ModelSerializer):
+    course = CourseListSerializer()
+
     class Meta:
-        model = Review
-        fields = '__all__'
+        model = FavouriteCourse
+        fields = ['cart', 'course']
+
+
+class FavouriteSerializer(serializers.ModelSerializer):
+    user = UserProfileSerializer()
+
+    class Meta:
+        model = Favourite
+        fields = ['user']
