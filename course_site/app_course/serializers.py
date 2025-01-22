@@ -1,5 +1,44 @@
 from rest_framework import serializers
 from .models import UserProfile, Category, Course, Lesson, Assignment, Question, Option, Exam, Certificate, Review, FavouriteCourse, Favourite
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['password', 'last_name', 'username']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = UserProfile.objects.create_user(**validated_data)
+        return user
+
+    def to_representation(self, instance):
+        refresh = RefreshToken.for_user(instance)
+        return {
+            'user': {
+                'username': instance.username,
+                'email': instance.email,
+            },
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise serializers.ValidationError("Неверные учетные данные")
+        return user
+
 
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):

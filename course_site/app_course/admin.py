@@ -58,12 +58,6 @@ class CategoryAdmin(TranslationAdmin):
 
 admin.site.register(UserProfile)
 admin.site.register(Certificate)
-# admin.site.register(Lesson)
-# admin.site.register(Assignment)
-# admin.site.register(Question)
-# admin.site.register(Option)
-# admin.site.register(Exam)
 admin.site.register(Review)
 admin.site.register(Favourite)
 admin.site.register(FavouriteCourse)
-# admin.site.register(Category)

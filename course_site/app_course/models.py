@@ -16,6 +16,7 @@ class UserProfile(AbstractUser):
     )
     user_role = models.CharField(max_length=140, choices=ROLE_CHOICES, default='студент')
 
+
     def __str__(self):
         return f'{self.first_name}-{self.last_name}-{self.user_role}'
 
@@ -46,6 +47,15 @@ class Course(models.Model):
     def __str__(self):
         return self.course_name
 
+    def get_average_rating(self):
+        reviews = self.review_set.all()
+        if reviews.exists():
+            return round(sum(review.rating for review in reviews) / reviews.count(), 1)
+        return 0
+
+    def get_count_reviews(self):
+        return self.review_set.count()
+
 
 class Lesson(models.Model):
     title = models.CharField(max_length=140)
@@ -63,9 +73,8 @@ class Assignment(models.Model):
     due_date = models.DateField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='tasks')
 
-
     def __str__(self):
-        return f'{self.text}-{self.question}'
+        return f'{self.title} - {self.course}'
 
 
 class Exam(models.Model):
@@ -89,6 +98,8 @@ class Question(models.Model):
                                                                  MaxValueValidator(5)], null=True, blank=True)
     duration = models.DurationField()
 
+    def __str__(self):
+        return f'{self.text}'
 
 class Option(models.Model):
     question = models.ForeignKey(Question, on_delete= models.CASCADE, related_name='options')
@@ -111,6 +122,7 @@ class Review(models.Model):
     course = models.ForeignKey(Course, on_delete= models.CASCADE)
     rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)], null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
+    parent_review = models.ForeignKey('self',related_name='replies',null=True,blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.user}-{self.rating}'
@@ -129,3 +141,15 @@ class FavouriteCourse(models.Model):
 
     def __str__(self):
         return f'{self.course}-{self.cart}'
+
+
+class Chat(models.Model):
+    client = models.ManyToManyField(UserProfile)
+    created_date = models.DateField(auto_now_add=True)
+
+
+class Massage(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    text = models.TextField(null=True,blank=True)
+    created_date = models.DateField(auto_now_add=True)

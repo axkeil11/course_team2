@@ -28,4 +28,7 @@ urlpatterns = (
     path('assignment/create/', AssignmentCreateAPIView.as_view(), name='assignment_create'),
     path('certificate/', CertificateApiView.as_view(), name='certificate'),
     path('certificate/create/', CertificateCreateApiview.as_view(), name='certificate_create'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='Logout'),
 )
